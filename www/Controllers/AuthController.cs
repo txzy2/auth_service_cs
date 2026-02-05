@@ -1,32 +1,54 @@
 using Microsoft.AspNetCore.Mvc;
+using MyMicroservice.Application.Common.Errors;
+using MyMicroservice.Application.Common.Exceptions;
 using MyMicroservice.Application.Services;
 using MyMicroservice.Contracts.Requests;
 using MyMicroservice.Contracts.Responses;
+using MyMicroservice.Domain.Entities;
+
+namespace MyMicroservice.API.Controllers;
 
 [ApiController]
-[Route("api/v1/auth")]
-public class AuthController(IUserService userService) : ControllerBase
+[Route("api/v1/[controller]")]
+public class AuthController : ControllerBase
 {
-    private readonly IUserService _userService = userService;
+    private readonly IUserService _userService;
 
-    /// <summary>
-    /// Log incident endpoint
-    /// </summary>
-    /// <param name="request"></param>
-    /// <returns></returns>
-    [HttpPost]
-    [Route("register")]
-    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Register([FromBody] RegisterJsonRequest request)
+    public AuthController(IUserService userService)
     {
-        Console.WriteLine($"Received register request: {request}");
-        return Ok(
-            ApiResponse<string>.Ok(
-                await _userService.RegisterAsync(request)
-            )
-        );
+        _userService = userService;
     }
 
-}
+    /// <summary>
+    /// Register a new user
+    /// </summary>
+    [HttpPost("register")]
+    [ProducesResponseType(typeof(SuccessResponse<string>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Register([FromBody] RegisterJsonRequest request)
+    {
+        var result = await _userService.RegisterAsync(request);
+        return Ok(ApiResponse.Success(result));
+    }
 
+    /// <summary>
+    /// Login endpoint
+    /// </summary>
+    [HttpPost("login")]
+    [ProducesResponseType(typeof(SuccessResponse<User>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Login([FromBody] LoginJsonRequest request)
+    {
+        try
+        {
+            var user = await _userService.LoginAsync(request);
+            return Ok(ApiResponse.Success(user));
+        }
+        catch (ApiException ex)
+        {
+            return BadRequest(ApiResponse.Error(ex.Message, ex.StatusCode));
+        }
+    }
+}

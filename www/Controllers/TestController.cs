@@ -13,16 +13,10 @@ public class TestController : ControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(SuccessResponse<string>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Test([FromBody] TestJsonBodyRequest request)
     {
-        if (request.Name == "error")
-        {
-            return BadRequest(ApiResponse<string>.Error("Some ErrorMessage"));
-        }
-
-        return Ok(ApiResponse<string>.Ok($"Hello, {request.Name}!"));
+        return Ok(ApiResponse.Success($"Hello, {request.Name}!"));
     }
 
 }

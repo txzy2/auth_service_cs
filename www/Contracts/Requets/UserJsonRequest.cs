@@ -1,21 +1,30 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices;
-using System.Text.Json.Serialization;
 
 namespace MyMicroservice.Contracts.Requests;
 
 public record RegisterJsonRequest(
-    [property: JsonPropertyName("login")]
-    [Required]
-    [MinLength(3)]
+    [Required(ErrorMessage = "Login is required")]
+    [StringLength(50, MinimumLength = 3, ErrorMessage = "Login must be between 3 and 50 characters")]
     string Login,
 
-    [property: JsonPropertyName("password")]
-    [Required]
-    [MinLength(8)]
-    string Password,
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Invalid email format")]
+    string Email,
 
-    [property: JsonPropertyName("demo")]
-    [Optional]
-    string? Demo
+    [Required(ErrorMessage = "Name is required")]
+    [StringLength(100, MinimumLength = 2, ErrorMessage = "Name must be between 2 and 100 characters")]
+    string Name,
+
+    [Required(ErrorMessage = "Password is required")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters")]
+    string Password
+);
+
+public record LoginJsonRequest(
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Invalid email format")]
+    string Email,
+
+    [Required(ErrorMessage = "Password is required")]
+    string Password
 );

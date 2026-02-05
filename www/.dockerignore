@@ -1,0 +1,15 @@
+.git
+.gitignore
+bin
+obj
+.vs
+.vscode
+.idea
+node_modules
+.env
+.env.local
+docker-compose*.yml
+Dockerfile*
+README.md
+*.log
+core.*

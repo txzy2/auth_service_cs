@@ -2,7 +2,7 @@ dps-dev:
 	docker compose -f docker-compose.dev.yml ps
 
 dbr-dev:
-	docker compose -f docker-compose.dev.yml down && docker compose -f docker-compose.dev.yml up -d --build
+	docker compose -f docker-compose.dev.yml down && docker compose -f docker-compose.dev.yml up -d --build && docker logs -f --tail=50 auth_cs_app
 
 dlogs-app:
 	docker logs -f --tail=50 auth_cs_app
