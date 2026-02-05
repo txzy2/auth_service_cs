@@ -1,0 +1,16 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0
+
+WORKDIR /var/www
+COPY . .
+
+RUN dotnet restore
+
+# Установка dotnet-ef глобально
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+EXPOSE 4200
+
+ENV ASPNETCORE_URLS=http://0.0.0.0:4200
+
+CMD ["dotnet", "watch", "run", "--no-launch-profile"]

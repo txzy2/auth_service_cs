@@ -1,0 +1,6 @@
+.env
+
+nginx/logs/
+
+dbdata/
+redis_data/
