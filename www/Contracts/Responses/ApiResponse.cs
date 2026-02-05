@@ -2,17 +2,33 @@ using System.Text.Json.Serialization;
 
 namespace MyMicroservice.Contracts.Responses;
 
-public record ApiResponse<T>(
-    bool Success,
-
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)] // Убираем поле из JSON, если оно null
-    [property: JsonPropertyName("data")]
-    T? Data,
-
-    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    string? ErrorMessage = null
-)
+// Success Response
+public class SuccessResponse<T>(T data)
 {
-    public static ApiResponse<T> Ok(T? Data) => new(true, Data);
-    public static ApiResponse<T> Error(string? ErrorMessage = null) => new(false, default, ErrorMessage);
+    [JsonPropertyName("success")]
+    public bool Success { get; set; } = true;
+
+    [JsonPropertyName("data")]
+    public T Data { get; set; } = data;
+}
+
+// Error Response
+public class ErrorResponse(string error, int errorCode)
+{
+    [JsonPropertyName("success")]
+    public bool Success { get; set; } = false;
+
+    [JsonPropertyName("error")]
+    public string Error { get; set; } = error;
+
+    [JsonPropertyName("errorCode")]
+    public int ErrorCode { get; set; } = errorCode;
+}
+
+// Factory для удобства
+public static class ApiResponse
+{
+    public static SuccessResponse<T> Success<T>(T data) => new(data);
+
+    public static ErrorResponse Error(string error, int errorCode) => new(error, errorCode);
 }

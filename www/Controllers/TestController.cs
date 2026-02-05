@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MyMicroservice.Contracts.Requests;
 using MyMicroservice.Contracts.Responses;
+using Swashbuckle.AspNetCore.Annotations;
 
 [ApiController]
 [Route("api/v1/test")]
@@ -13,16 +14,16 @@ public class TestController : ControllerBase
     /// <param name="request"></param>
     /// <returns></returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse<string>), StatusCodes.Status400BadRequest)]
+    [SwaggerOperation(
+        Summary = "Test endpoint",
+        Description = "A simple test endpoint to verify API functionality. Accepts a name and returns a greeting message.",
+        OperationId = "Test",
+        Tags = new[] { "Test" }
+    )]
+    [SwaggerResponse(200, "Returns a greeting message", typeof(SuccessResponse<string>))]
     public async Task<IActionResult> Test([FromBody] TestJsonBodyRequest request)
     {
-        if (request.Name == "error")
-        {
-            return BadRequest(ApiResponse<string>.Error("Some ErrorMessage"));
-        }
-
-        return Ok(ApiResponse<string>.Ok($"Hello, {request.Name}!"));
+        return Ok(ApiResponse.Success($"Hello, {request.Name}!"));
     }
 
 }

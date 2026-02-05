@@ -8,6 +8,21 @@ public static class SwaggerConfiguration
     {
         services.AddSwaggerGen(c =>
         {
+            c.SwaggerDoc("v1", new()
+            {
+                Title = "Auth Microservice API",
+                Version = "v1",
+                Description = "Authentication and authorization microservice",
+                Contact = new()
+                {
+                    Name = "Your Name",
+                    Email = "your.email@example.com"
+                }
+            });
+
+            // Включаем аннотации
+            c.EnableAnnotations();
+
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
@@ -15,12 +30,6 @@ public static class SwaggerConfiguration
             {
                 c.IncludeXmlComments(xmlPath);
             }
-
-            c.SwaggerDoc("v1", new()
-            {
-                Title = "My Microservice API",
-                Version = "v1"
-            });
         });
 
         return services;
@@ -28,11 +37,16 @@ public static class SwaggerConfiguration
 
     public static IApplicationBuilder UseSwaggerDocumentation(this WebApplication app)
     {
-        if (app.Environment.IsDevelopment())
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Auth API V1");
+            c.RoutePrefix = "swagger";
+            c.DocumentTitle = "Auth API Documentation";
+        });
+
+        var baseUrl = Environment.GetEnvironmentVariable("APP_URL") ?? "http://localhost:4200";
+        Console.WriteLine($"✓ Swagger UI available at: {baseUrl}/swagger");
 
         return app;
     }
