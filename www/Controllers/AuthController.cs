@@ -1,31 +1,35 @@
 using Microsoft.AspNetCore.Mvc;
-using MyMicroservice.Application.Common.Errors;
 using MyMicroservice.Application.Common.Exceptions;
 using MyMicroservice.Application.Services;
 using MyMicroservice.Contracts.Requests;
 using MyMicroservice.Contracts.Responses;
 using MyMicroservice.Domain.Entities;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace MyMicroservice.API.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
-public class AuthController : ControllerBase
+[Produces("application/json")]
+public class AuthController(IUserService userService) : ControllerBase
 {
-    private readonly IUserService _userService;
-
-    public AuthController(IUserService userService)
-    {
-        _userService = userService;
-    }
+    private readonly IUserService _userService = userService;
 
     /// <summary>
     /// Register a new user
     /// </summary>
+    /// <param name="request">User registration data</param>
+    /// <returns>Registration confirmation message</returns>
     [HttpPost("register")]
-    [ProducesResponseType(typeof(SuccessResponse<string>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    [SwaggerOperation(
+        Summary = "Register a new user",
+        Description = "Creates a new user account with the provided credentials. Email must be unique.",
+        OperationId = "Register",
+        Tags = new[] { "Authentication" }
+    )]
+    [SwaggerResponse(200, "User successfully registered", typeof(SuccessResponse<string>))]
+    [SwaggerResponse(400, "Invalid input data (validation error)", typeof(ErrorResponse))]
+    [SwaggerResponse(409, "User with this email already exists", typeof(ErrorResponse))]
     public async Task<IActionResult> Register([FromBody] RegisterJsonRequest request)
     {
         var result = await _userService.RegisterAsync(request);
@@ -33,12 +37,20 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Login endpoint
+    /// Authenticate user
     /// </summary>
+    /// <param name="request">User login credentials</param>
+    /// <returns>User data if authentication successful</returns>
     [HttpPost("login")]
-    [ProducesResponseType(typeof(SuccessResponse<User>), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [SwaggerOperation(
+        Summary = "Authenticate user",
+        Description = "Validates user credentials and returns user information. Use this endpoint to log in users.",
+        OperationId = "Login",
+        Tags = new[] { "Authentication" }
+    )]
+    [SwaggerResponse(200, "Successfully authenticated. Returns user data.", typeof(SuccessResponse<User>))]
+    [SwaggerResponse(400, "Invalid credentials. Password does not match.", typeof(ErrorResponse))]
+    [SwaggerResponse(404, "User with provided email not found", typeof(ErrorResponse))]
     public async Task<IActionResult> Login([FromBody] LoginJsonRequest request)
     {
         try
