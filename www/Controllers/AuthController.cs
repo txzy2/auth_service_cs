@@ -11,9 +11,10 @@ namespace MyMicroservice.API.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Produces("application/json")]
-public class AuthController(IUserService userService) : ControllerBase
+public class AuthController(IUserService userService, ILogger<AuthController> logger) : ControllerBase
 {
     private readonly IUserService _userService = userService;
+    private readonly ILogger<AuthController> _logger = logger;
 
     /// <summary>
     /// Register a new user
@@ -32,7 +33,9 @@ public class AuthController(IUserService userService) : ControllerBase
     [SwaggerResponse(409, "User with this email already exists", typeof(ErrorResponse))]
     public async Task<IActionResult> Register([FromBody] RegisterJsonRequest request)
     {
+        _logger.LogInformation($"AuthController try REGISTER {request.Email}");
         var result = await _userService.RegisterAsync(request);
+        _logger.LogInformation("User registered successfully: {Email}", request.Email);
         return Ok(ApiResponse.Success(result));
     }
 
@@ -53,13 +56,16 @@ public class AuthController(IUserService userService) : ControllerBase
     [SwaggerResponse(404, "User with provided email not found", typeof(ErrorResponse))]
     public async Task<IActionResult> Login([FromBody] LoginJsonRequest request)
     {
+        _logger.LogInformation($"AuthController try LOGIN {request.Email}");
         try
         {
             var user = await _userService.LoginAsync(request);
+            _logger.LogInformation("User logged in successfully: {Email}", request.Email);
             return Ok(ApiResponse.Success(user));
         }
         catch (ApiException ex)
         {
+            _logger.LogWarning("Login failed for {Email}: {Message}", request.Email, ex.Message);
             return BadRequest(ApiResponse.Error(ex.Message, ex.StatusCode));
         }
     }
