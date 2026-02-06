@@ -12,6 +12,7 @@ public static class ApiErrorExtensions
             ApiError.NullList => "User list is null",
             ApiError.InvalidCredentials => "Invalid credentials",
             ApiError.ValidationError => "Validation error",
+            ApiError.InvalidRole => "Invalid user role",
             _ => throw new ArgumentOutOfRangeException(nameof(error), error, null)
         };
     }
@@ -25,7 +26,7 @@ public static class ApiErrorExtensions
             ApiError.UserExist => 409,
             ApiError.NullList => 404,
             ApiError.InvalidCredentials => 401,
-            ApiError.ValidationError => 400,
+            ApiError.ValidationError or ApiError.InvalidRole => 400,
             _ => 500
         };
     }

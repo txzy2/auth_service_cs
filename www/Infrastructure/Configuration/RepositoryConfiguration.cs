@@ -7,10 +7,9 @@ public static class RepositoryConfiguration
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IUserRepository, UserRepository>();
-
-        // Добавляйте другие репозитории здесь
-        // services.AddScoped<IProductRepository, ProductRepository>();
+        services.AddScoped<IRolesRepository, RolesRepository>();
 
         return services;
     }
+    
 }

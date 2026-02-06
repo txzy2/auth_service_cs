@@ -56,16 +56,14 @@ public class AuthController(IUserService userService, ILogger<AuthController> lo
     [SwaggerResponse(404, "User with provided email not found", typeof(ErrorResponse))]
     public async Task<IActionResult> Login([FromBody] LoginJsonRequest request)
     {
-        _logger.LogInformation($"AuthController try LOGIN {request.Email}");
+        _logger.LogInformation($"AuthController try LOGIN {request.Login}");
         try
         {
-            var user = await _userService.LoginAsync(request);
-            _logger.LogInformation("User logged in successfully: {Email}", request.Email);
-            return Ok(ApiResponse.Success(user));
+            return Ok(ApiResponse.Success(await _userService.LoginAsync(request)));
         }
         catch (ApiException ex)
         {
-            _logger.LogWarning("Login failed for {Email}: {Message}", request.Email, ex.Message);
+            _logger.LogWarning("Login failed for {Login}: {Message}", request.Login, ex.Message);
             return BadRequest(ApiResponse.Error(ex.Message, ex.StatusCode));
         }
     }
