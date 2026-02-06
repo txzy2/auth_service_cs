@@ -8,9 +8,6 @@ public static class ServiceConfiguration
     {
         services.AddScoped<IUserService, UserService>();
 
-        // Добавляйте другие сервисы здесь
-        // services.AddScoped<IProductService, ProductService>();
-
         return services;
     }
 }

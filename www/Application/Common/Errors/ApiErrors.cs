@@ -7,5 +7,6 @@ public enum ApiError
     UserExist,
     NullList,
     InvalidCredentials,
-    ValidationError
+    ValidationError,
+    InvalidRole
 }
