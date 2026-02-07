@@ -1,5 +1,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0
 
+RUN ulimit -c 0
+
 WORKDIR /var/www
 COPY . .
 

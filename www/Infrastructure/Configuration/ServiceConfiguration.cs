@@ -7,6 +7,8 @@ public static class ServiceConfiguration
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IRedisCacheService, RedisCacheService>();
+        services.AddScoped<IJwtService, JwtService>();
 
         return services;
     }

@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using MyMicroservice.Contracts;
 using MyMicroservice.Contracts.Responses;
 using MyMicroservice.Domain.Entities;
+using MyMicroservice.Domain.ValueObjects;
 using MyMicroservice.Enums;
 using MyMicroservice.Infrastructure.Data;
 
@@ -9,59 +9,46 @@ namespace MyMicroservice.Infrastructure.Repositories;
 
 public interface IUserRepository
 {
-    Task<UserJsonResponse?> CreateUser(PreparedRegisterJsonRequest data);
+    Task<UserJsonResponse> CreateUser(PreparedRegisterJsonRequest data);
     Task<User?> GetUserByEmailAsync(string email);
     Task<User?> GetUserByLoginAsync(string login);
 }
 
-public class UserRepository(ApplicationDbContext _context, ILogger<UserRepository> logger) : IUserRepository
+public class UserRepository(ApplicationDbContext context, ILogger<UserRepository> logger) : IUserRepository
 {
-    private readonly ApplicationDbContext _context = _context;
-    private readonly ILogger<UserRepository> _logger = logger;
-
-    public async Task<UserJsonResponse?> CreateUser(PreparedRegisterJsonRequest data)
+    public async Task<UserJsonResponse> CreateUser(PreparedRegisterJsonRequest data)
     {
-        Console.WriteLine($"User Repo works. User saved: {data}");
-        _logger.LogInformation($"role {data.Role.ToRoleId()}");
-        try
+        logger.LogInformation("Creating user {Login} with role {RoleId}", data.Login, data.Role.ToRoleId());
+        var user = new User
         {
-            var user = new User
-            {
-                Name = data.Name,
-                Email = data.Email,
-                Login = data.Login,
-                PasswordHash = data.PasswordHash,
-                ExtId = data.ExtId,
-                RoleId = data.Role.ToRoleId()
-            };
-            
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
+            Name = data.Name,
+            Email = data.Email,
+            Login = data.Login,
+            PasswordHash = data.PasswordHash,
+            ExtId = data.ExtId,
+            RoleId = data.Role.ToRoleId()
+        };
 
-            return new UserJsonResponse(
-                Login: user.Login,
-                Email: user.Email,
-                Name: user.Name,
-                Role: data.Role.ToAlias(),
-                CreatedAt: user.CreatedAt,
-                UpdatedAt: user.UpdatedAt ?? DateTime.UtcNow
-            );
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error creating user: {ex.Message}");
-            return null;
-        }
-       
+        context.Users.Add(user);
+        await context.SaveChangesAsync();
+
+        return new UserJsonResponse(
+            user.Login,
+            user.Email,
+            user.Name,
+            data.Role.ToAlias(),
+            user.CreatedAt,
+            user.UpdatedAt ?? DateTime.UtcNow
+        );
     }
 
     public async Task<User?> GetUserByEmailAsync(string email)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+        return await context.Users.FirstOrDefaultAsync(u => u.Email == email);
     }
 
     public async Task<User?> GetUserByLoginAsync(string login)
     {
-        return await _context.Users.FirstOrDefaultAsync(u => u.Login == login);
+        return await context.Users.FirstOrDefaultAsync(u => u.Login == login);
     }
 }
