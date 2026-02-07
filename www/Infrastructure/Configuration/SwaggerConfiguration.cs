@@ -1,4 +1,5 @@
 using System.Reflection;
+using Microsoft.OpenApi;
 
 namespace MyMicroservice.API.Configuration;
 
@@ -8,12 +9,12 @@ public static class SwaggerConfiguration
     {
         services.AddSwaggerGen(c =>
         {
-            c.SwaggerDoc("v1", new()
+            c.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "Auth Microservice API",
                 Version = "v1",
                 Description = "Authentication and authorization microservice",
-                Contact = new()
+                Contact = new OpenApiContact
                 {
                     Name = "Your Name",
                     Email = "your.email@example.com"
@@ -26,10 +27,7 @@ public static class SwaggerConfiguration
             var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
             var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
 
-            if (File.Exists(xmlPath))
-            {
-                c.IncludeXmlComments(xmlPath);
-            }
+            if (File.Exists(xmlPath)) c.IncludeXmlComments(xmlPath);
         });
 
         return services;
@@ -46,7 +44,7 @@ public static class SwaggerConfiguration
         });
 
         var baseUrl = Environment.GetEnvironmentVariable("APP_URL") ?? "http://localhost:4200";
-        Console.WriteLine($"✓ Swagger UI available at: {baseUrl}/swagger");
+        Console.WriteLine($"=== ✓ Swagger UI available at: {baseUrl}/swagger ===");
 
         return app;
     }
